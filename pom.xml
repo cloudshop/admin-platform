@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.eyun.client</groupId>
+	<artifactId>admin_mercury</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<name>商家管理后台</name>
+
+	<properties>
+		<!-- Build properties -->
+		<maven.version>3.0.0</maven.version>
+		<node.version>v8.11.1</node.version>
+		<npm.version>5.6.0</npm.version>
+		<!-- These remain empty unless the corresponding profile is active -->
+		<frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+		<dockerfile-maven-plugin.version>1.3.4</dockerfile-maven-plugin.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<!-- Use the latest released version: https://repo1.maven.org/maven2/com/github/eirslett/frontend-maven-plugin/ -->
+				<version>${frontend-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<!-- optional: you don't really need execution ids, but it looks nice 
+							in your build log. -->
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<!-- optional: default phase is "generate-resources" -->
+						<phase>generate-resources</phase>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<!-- optional: default phase is "generate-resources" -->
+						<phase>generate-resources</phase>
+						<configuration>
+							<!-- optional: The default argument is actually "install", so unless 
+								you need to run some other npm command, you can remove this whole <configuration> 
+								section. -->
+							<arguments>install --registry=http://dev.eyun.online:8081/repository/npm/</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm run build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<!-- optional: default phase is "generate-resources" -->
+						<phase>generate-resources</phase>
+						<configuration>
+							<!-- optional: The default argument is actually "install", so unless 
+								you need to run some other npm command, you can remove this whole <configuration> 
+								section. -->
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<nodeVersion>${node.version}</nodeVersion>
+					<!-- optional: with node version greater than 4.0.0 will use npm provided 
+						by node distribution -->
+					<npmVersion>${npm.version}</npmVersion>
+					<!-- optional: where to download node and npm from. Defaults to https://nodejs.org/dist/ -->
+      			    <!-- <npmDownloadRoot>http://dev.eyun.online:8081/repository/npm/</npmDownloadRoot> -->
+ 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>${dockerfile-maven-plugin.version}</version>
+				<!-- Uncomment the section below to build the docker image with mvn package 
+					and and push it with mvn deploy <executions> <execution> <id>default</id> 
+					<goals> <goal>build</goal> <goal>push</goal> </goals> </execution> </executions> -->
+				<configuration>
+					<repository>admin_mercury</repository>
+					<tag>latest</tag>
+					<contextDirectory>${project.build.directory}</contextDirectory>
+				</configuration>
+			</plugin>
+			<!-- jhipster-needle-maven-add-plugin -->
+		</plugins>
+	</build>
+
+</project>
