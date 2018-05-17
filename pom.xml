@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.eyun.client</groupId>
-	<artifactId>admin_mercury</artifactId>
+	<artifactId>admin_platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>商家管理后台</name>
+	<name>平台商家管理后台</name>
 
 	<properties>
 		<!-- Build properties -->
