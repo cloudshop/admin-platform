@@ -1,9 +1,9 @@
 <template>
-  <div class="login-wrap" :style ="imgs">
-    <el-form label-position="left" :model="ruleForm" ref="ruleForm" label-width="0px" class="demo-ruleForm login-container">
-      <h2 class="title">贡融积分<span class="logtitle"></span>商家管理平台</h2>
+  <div class="login-wrap" >
+    <el-form label-position="left" :model="ruleForm" ref="ruleForm" label-width="0px" class="login-form ">
+      <h2 class="title">贡融积分管理员后台</h2>
       <el-form-item prop="PassName">
-        <el-input type="text" v-model="ruleForm.PassName" auto-complete="off" @blur="upperCase" placeholder="请输入手机号"></el-input>
+        <el-input  type="text" v-model="ruleForm.PassName" auto-complete="off" @blur="upperCase" placeholder="请输入手机号"></el-input>
       </el-form-item>
       <el-form-item prop="PassWord">
         <el-input type="password" v-model="ruleForm.PassWord" auto-complete="off" placeholder="请输入密码"></el-input>
@@ -25,9 +25,7 @@ export default {
   name: "login",
   data() {
     return {
-      imgs:{
-        backgroundImage: "url(" + require("../../assets/img/bg.png") + ")",
-      },
+     
       iphoneYN: false,
       logining: false,
       ruleForm: {
@@ -92,70 +90,46 @@ export default {
 </script>
 <style scoped>
 .login-wrap {
-  box-sizing: border-box;
-  width: 100%;
+  position: fixed;
   height: 100%;
-  padding-top: 15%;
-  background-color: #112346;
-  background-repeat: no-repeat;
-  background-position: center right;
+  width: 100%;
+  background-color:  #2d3a4b;
+  box-sizing: border-box;
+  
 }
-
-.login-container {
-  border-radius: 10px;
-  margin: 0px auto;
-  width: 350px;
-  padding: 30px 35px 15px 35px;
-  background: #fff;
-  border: 1px solid #eaeaea;
-  text-align: left;
-}
-
-.login-container h2 {
-  margin-bottom: 20px;
-}
+.login-form {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 360px;
+    padding: 35px 35px 15px 35px;
+    margin: 120px auto;
+  }
 
 .title {
-  margin: 0px auto 40px auto;
+  font-size: 30px;
+  font-weight: 400;
+  color: #eee;
+  text-shadow: 0px 8px 10px #0c0b13;
+  margin: 0px auto 30px auto;
   text-align: center;
-  color: #505458;
+  font-weight: bold;
 }
 
-.remember {
-  margin: 0px 0px 35px 0px;
-}
+.el-form-item {
+    box-shadow: 0px 6px 14px #242233
+  }
 
-.logoncont {
-  display: flex;
-  justify-content: space-between;
-}
+/*.el-input input {
+    background: transparent!important;
+    color: #fff;
+    height: 50px;
+    line-height: 50px;
+    border: 1px solid #a5a5a5;
+    font-size: 18px;
+      
+    }*/
 
-.logtitle {
-  padding: 0 20px;
-}
 
-.yanzheng {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.yanzma {
-  width: 35%;
-}
-
-.shuaxin span {
-  display: inline-block;
-  border: 1px solid #ccc;
-  font-size: 22px;
-  width: 80px;
-  text-align: center;
-  height: 40px;
-  vertical-align: top;
-  line-height: 40px;
-  box-sizing: border-box;
-  border-radius: 4px;
-  margin-right: 10px;
-}
 
 </style>

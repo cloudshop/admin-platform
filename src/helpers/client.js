@@ -62,7 +62,7 @@ function login(userInput) {
 
     oauth2.ownerPassword.getToken(tokenConfig, (error, result) => {
         if (error) {
-            console.log('Access Token Error', error.message);
+            // console.log('Access Token Error', error.message);
 
             if (error.response.status === 500) {
                 alert('服务器繁忙，请耐心等待')
@@ -74,7 +74,7 @@ function login(userInput) {
         }
 
         const accessToken = oauth2.accessToken.create(result)
-        console.log('Access Token 2', accessToken);
+        // console.log('Access Token 2', accessToken);
         // store the token in global variable ??
         store.commit(types.LOGIN, result);
         var val = {
@@ -153,7 +153,7 @@ function shouldRefresh(accessToken) {
 }
 
 function bearToken(token) {
-    console.log(token)
+    // console.log(token)
     if (token !== null && typeof token.access_token !== "undefined") {
         return 'Bearer '.concat(token.access_token);
     }
@@ -169,7 +169,7 @@ axios.interceptors.request.use(
             config.headers.Authorization = store.getters.bearToken
 
             /*判断刷新token请求的refresh_token是否过期*/
-            // Create the access token wrapper
+            // Create the access token wrapper`
             let accessToken = oauth2.accessToken.create(store.state.token);
             // let accessToken = store.state.token;
 
@@ -230,6 +230,7 @@ axios.interceptors.request.use(
     });
 
 // http response 拦截器
+
 axios.interceptors.response.use(
     response => {
         return response;
@@ -239,6 +240,7 @@ axios.interceptors.response.use(
             switch (error.response.status) {
                 case 401:
                     // 401 清除token信息并跳转到登录页面
+                    // console.log(1231231231,'bacd')
                     store.commit(types.LOGOUT);
                     router.replace({
                         path: 'login',
@@ -246,7 +248,7 @@ axios.interceptors.response.use(
                     })
             }
         }
-        console.log(JSON.stringify(error));//console : Error: Request failed with status code 402
+        // console.log(JSON.stringify(error));//console : Error: Request failed with status code 402
         return Promise.reject(error);
     });
 

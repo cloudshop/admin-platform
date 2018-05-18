@@ -9,7 +9,7 @@ import storePlugin from '../storePlugin'
 // 登录
 const login         = r => require.ensure([], () => r(require('@/components/Login/Login')), 'login');
 // 注册
-const register      = r => require.ensure([], () => r(require('@/page/register')), 'register');
+// const register      = r => require.ensure([], () => r(require('@/page/register')), 'register');
 // 首页
 const index         = r => require.ensure([], () => r(require('@/page/index')), 'index');
 // 商家首页
@@ -17,9 +17,9 @@ const extract    = r => require.ensure([], () => r(require('@/page/extract')), '
 // 商品列表
 const authentication = r => require.ensure([], () => r(require('@/page/authentication')), ' authentication');
 // 添加商品
-const goodsAddNew   = r => require.ensure([], () => r(require('@/page/goodsAddNew')), 'goodsAddNew');
+// const goodsAddNew   = r => require.ensure([], () => r(require('@/page/goodsAddNew')), 'goodsAddNew');
 // 全部订单
-const allOrder   = r => require.ensure([], () => r(require('@/page/allOrder')), 'allOrder');
+// const allOrder   = r => require.ensure([], () => r(require('@/page/allOrder')), 'allOrder');
 //发货页面
 // const sendGoods   = r => require.ensure([], () => r(require('@/page/sendGoods')), 'sendGoods');
 
@@ -69,23 +69,27 @@ const router = new Router({
  
     ]
 })
+// 页面刷新的时候重新赋值路由
+if (window.localStorage.getItem('token')) {
+    var token= JSON.parse(window.localStorage.getItem('token'))
+    store.commit(types.LOGIN, token)
+}
 
-// router.beforeEach((to, from, next) => {
-//     if (to.matched.some(r => r.meta.requireAuth)) {
-//         console.log(store.state.token)
-//         if (store.state.token) {
-//             next();
-//         }
-//         else {
-//             next({
-//                 path: '/login',
-//                 query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
-//             })
-//         }
-//     }
-//     else {
-//         next();
-//     }
-// })
+router.beforeEach((to, from, next) => {
+    if (to.meta.requireAuth) {
+        if (window.sessionStorage.getItem('name') !== null) {
+            next();
+        }
+        else {
+            next({
+                path: '/login',
+                query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
+            })
+        }
+    }
+    else {
+        next();
+    }
+})
 
  export default router

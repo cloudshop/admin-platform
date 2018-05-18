@@ -51,7 +51,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- 商品单价、让利、库存、货号列表 -->
               <tr v-for="(item,index) in listData">
                 <td v-text="item.cardholder"></td>
                 <td v-text="item.statusString"></td>
@@ -59,9 +58,8 @@
                 <td v-text="item.openingBank"></td>
                 <td>{{item.money + ' 元'}}</td>
                 <td>
-                  <!-- <el-button type="primary" :disabled="item.status !== 2" :disabled="item.status !== 4 && item.status !== 5" size="small" @click="handleFailed(item)">修改</el-button> -->
-                  <el-button type="primary" size="medium" @click="handleSeccess(item)">完成</el-button>
-                  <el-button type="danger" size="medium" @click="handleFailed(item)">失败</el-button>
+                  <el-button type="primary" size="medium" :disabled="item.statusString === '提现成功' || item.statusString === '提现失败'" @click="handleSeccess(item)">完成</el-button>
+                  <el-button type="danger" size="medium" :disabled="item.statusString === '提现成功' || item.statusString === '提现失败'" @click="handleFailed(item)">失败</el-button>
                 </td>
               </tr>
             </tbody>
@@ -71,7 +69,7 @@
     </el-row>
     <!-- 分页 -->
     <el-col :span="24" class="toolbar" v-show="!noData">
-      <el-pagination background layout="prev, pager, next" :page-size="pageSize" :total="total" :current-page="pageNum" @current-change="handleCurrentChange" @size-change="handleSizeChange" style="text-align:center;margin-top:10px;">
+      <el-pagination background layout="prev, pager, next" :page-size="pageSize" :total="total" :current-page="page" @current-change="handleCurrentChange" @size-change="handleSizeChange" style="text-align:center;margin-top:10px;">
       </el-pagination>
     </el-col>
     <!-- 编辑 -->
@@ -81,9 +79,6 @@
         <span class="goodsspan2">{{editForm.reason}}</span>
       </div>
       <el-input v-model="editForm.reason" placeholder="请输入内容"></el-input>
-      <!-- <el-radio v-model="editForm.reason" label="1" border>银行卡错误</el-radio>
-      <el-radio v-model="editForm.reason" label="2" border>开户行错误</el-radio>
-      <el-radio v-model="editForm.reason" label="3" border>姓名错误</el-radio> -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="close">取消</el-button>
         <el-button type="primary" @click="submit" :loading="loading" class="title1">提交</el-button>
@@ -100,19 +95,14 @@ export default {
       flat: 0,
       navs: ['全部', '待付款', '待发货', '已发货', '已完成', '已取消'],
       total: 0, //总页数
+      page:1,
       pageNum: 0,
       pageSize: 10,
       status: 0,
       loading: false,
       editForm: {},
       editFormVisible: false,
-      listData: [
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' }
-      ],
+      listData: [ ],
       input2: '',
       input21: '',
       serchOrderNo: '',
@@ -141,18 +131,8 @@ export default {
             picker.$emit('pick', date);
           }
         }]
-      },
-      options: [
-        { value: '顺丰', label: '顺丰' },
-        { value: '韵达快运', label: '韵达快运' },
-        { value: '申通', label: '申通' },
-        { value: '圆通速递', label: '圆通速递' },
-        { value: '中通速递', label: '中通速递' },
-        { value: '汇通快运', label: '汇通快运' },
-        { value: '德邦物流', label: '德邦物流' },
-        { value: 'ems快递', label: 'ems快递' },
-        { value: '全峰快递', label: '全峰快递' },
-      ]
+      }
+   
     };
   },
   watch: {
@@ -184,12 +164,13 @@ export default {
       if (this.listData.length === 0) {
         this.noData = true;
         this.$message({ message: "订单编号不存在!", type: "warning" });
+        this.serchOrderNo = '';
       }
     },
     filterOrder(index) {
       this.serchOrderNo = '';
       this.flat = index;
-      this.pageNum = 1;
+      this.pageNum = 0;
       this.status = index;
       this.getAllData();
     },
@@ -198,11 +179,12 @@ export default {
       const url = 'wallet/api/withdraw-deposits'
       this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}`)
         .then((res) => {
-          console.log(res)
           this.listData = res.data;
-          // this.total = res.data.proOrderAmount;
+          const totals = res.headers['x-total-count'];
+          this.listData = res.data;
+          this.total = Number(totals);
           this.loading = false;
-          if (res.data.proOrderAmount == 0) {
+          if (Number(totals) === 0) {
             this.noData = true;
           } else {
             this.noData = false;
@@ -216,8 +198,6 @@ export default {
       this.editFormVisible = true;
       // 深拷贝并赋值
       this.editForm = Object.assign({}, row); //合并对象操作
-      // this.editForm.reason= '1';
-      // console.log(this.editForm)
     },
     close() {
       this.editFormVisible = false;
@@ -228,28 +208,28 @@ export default {
          this.$message.error("请填写失败原因");
          return false
       }
-      // let data = Object.create(null);
-      // data.orderNo = this.editForm.orderNo;
-      // data.shippingName = this.editForm.shippingName;
-      // data.shipingCode = this.editForm.shipingCode;
+      const content = this.editForm.reason;
+      const id = this.editForm.id;
+     
       console.log(this.editForm)
-      // const url = 'order/api/updateOrderByShip'
-      // this.$confirm("确认提交吗？", "提示", {}).then(() => {
-      //   this.loading = true;
-      //   this.editFormVisible = false;
-      //   // 此处应该请求数据
-      //   this.$axios.post(url, data).then((res) => {
-      //     setTimeout(() => {
-      //       this.$message({message: "提交成功！",type: "success"});
-      //       this.loading = false;
-      //       this.getAllData();
-      //     }, 2000);
-      //   }).catch((err) => {
-      //     this.$message.error(err.response.data.title);
-      //     this.editFormVisible = false;
-      //     this.loading = false;
-      //   })
-      // });
+      const url = 'wallet/api/put-forward/refuse'
+      this.$confirm("确认提交吗？", "提示", {}).then(() => {
+        this.loading = true;
+        this.editFormVisible = false;
+        // 此处应该请求数据
+        this.$axios.put(url,{content,id}).then((res) => {
+          setTimeout(() => {
+            this.$message({message: "提交成功！",type: "success"});
+            this.loading = false;
+            this.getAllData();
+          }, 2000);
+        }).catch((err) => {
+          // console.log(err)
+          this.$message.error(err.response.data.title);
+          this.editFormVisible = false;
+          this.loading = false;
+        })
+      });
     },
     // 审核成功方法
     handleSeccess(row) {
@@ -258,7 +238,7 @@ export default {
       const data = row.id;
       this.$confirm("确认完成吗?", "提示", {}).then(() => {
         this.loading = true;
-        this.$axios.put(url,{withdrawDepositID:data}).then((res) => {
+        this.$axios.put(url+data).then((res) => {
           setTimeout(() => {
             this.$message({ message: "操作成功！",type: "success"});
             this.getAllData();
@@ -275,9 +255,15 @@ export default {
     handleSizeChange(val) {
       // console.log(`每页 ${val} 条`);
     },
-    // currentPage 改变时会触发
+    // currentPage 改变时更新数据
     handleCurrentChange(val) {
-      this.pageNum = val;
+      if(val === 1){
+        this.page = 1;
+        this.pageNum =0
+      }else{
+        this.pageNum = (val-1)
+         console.log(this.pageNum)
+      }
       this.getAllData()
     }
   }

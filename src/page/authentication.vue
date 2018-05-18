@@ -50,7 +50,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- 商品单价、让利、库存、货号列表 -->
               <tr v-for="(item,index) in listData">
                 <td v-text="item.realName"></td>
                 <td v-text="item.statusString"></td>
@@ -62,9 +61,8 @@
                   <el-button type="primary" size="medium" @click="lookcard(item)">查看图片</el-button>
                 </td>
                 <td>
-                  
-                  <el-button type="primary" size="medium" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" @click="handleSeccess(item)">完成</el-button>
-                  <el-button type="danger" size="medium" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" @click="handleFailed(item)">失败</el-button>
+                  <el-button type="primary" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleSeccess(item)">完成</el-button>
+                  <el-button type="danger" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleFailed(item)">失败</el-button>
                 </td>
               </tr>
             </tbody>
@@ -74,7 +72,7 @@
     </el-row>
     <!-- 分页 -->
     <el-col :span="24" class="toolbar" v-show="!noData">
-      <el-pagination background layout="prev, pager, next" :page-size="pageSize" :total="total" :current-page="pageNum" @current-change="handleCurrentChange" @size-change="handleSizeChange" style="text-align:center;margin-top:10px;">
+      <el-pagination background layout="prev, pager, next" :page-size="pageSize" :total="total" :current-page="page" @current-change="handleCurrentChange" @size-change="handleSizeChange" style="text-align:center;margin-top:10px;">
       </el-pagination>
     </el-col>
     <!-- 查看图片 -->
@@ -111,7 +109,8 @@ export default {
       noData: false,
       flat: 0,
       navs: ['全部', '待付款', '待发货', '已发货', '已完成', '已取消'],
-      total: 60, //总页数
+      total: 0, //总页数
+      page:1,
       pageNum: 0,
       pageSize: 10,
       status: 0,
@@ -119,16 +118,10 @@ export default {
       editForm: {},
       editFormVisible: false,
       lookimg: false,
-      listData: [
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' },
-        { zhanghao: '13241576288', xingming: '李雷', kahao: '6225001166778899', yinhang: '招商银行', money: '5000' }
-      ],
+      listData: [],
+      serchOrderNo: '',
       input2: '',
       input21: '',
-      serchOrderNo: '',
       value2: '',
       pickerOptions1: {
         disabledDate(time) {
@@ -154,18 +147,8 @@ export default {
             picker.$emit('pick', date);
           }
         }]
-      },
-      options: [
-        { value: '顺丰', label: '顺丰' },
-        { value: '韵达快运', label: '韵达快运' },
-        { value: '申通', label: '申通' },
-        { value: '圆通速递', label: '圆通速递' },
-        { value: '中通速递', label: '中通速递' },
-        { value: '汇通快运', label: '汇通快运' },
-        { value: '德邦物流', label: '德邦物流' },
-        { value: 'ems快递', label: 'ems快递' },
-        { value: '全峰快递', label: '全峰快递' },
-      ]
+      }
+    
     };
   },
   watch: {
@@ -197,12 +180,14 @@ export default {
       if (this.listData.length === 0) {
         this.noData = true;
         this.$message({ message: "订单编号不存在!", type: "warning" });
+        this.serchOrderNo = '';
+        return false
       }
     },
     filterOrder(index) {
       this.serchOrderNo = '';
       this.flat = index;
-      this.pageNum = 1;
+      this.pageNum = 0;
       this.status = index;
       this.getAllData();
     },
@@ -211,12 +196,12 @@ export default {
       const url = 'user/api/authentications'
       this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}`)
         .then((res) => {
-          console.log(res)
-          console.log(res.headers.link)
+          
+          const totals = res.headers['x-total-count'];
           this.listData = res.data;
-          // this.total = res.data.proOrderAmount;
+          this.total = Number(totals);
           this.loading = false;
-          if (res.data.proOrderAmount == 0) {
+          if (Number(totals) === 0) {
             this.noData = true;
           } else {
             this.noData = false;
@@ -230,15 +215,11 @@ export default {
        this.lookimg = true;
       // 深拷贝并赋值
       this.editForm = Object.assign({}, item); //合并对象操作
-      // this.editForm.reason= '1';
-      console.log(this.editForm)
     },
     handleFailed(row) {
       this.editFormVisible = true;
       // 深拷贝并赋值
       this.editForm = Object.assign({}, row); //合并对象操作
-      // this.editForm.reason= '';
-      console.log(this.editForm)
     },
     lookImgClose(){
       this.lookimg = false;
@@ -252,15 +233,14 @@ export default {
          this.$message.error("请填写失败原因");
          return false
       }
-      // console.log(this.editForm,'abc')
-      const data = this.editForm.id;
+      const id = this.editForm.id;
       const content = this.editForm.reason;
-      const url = 'user/api/authentication/refuse/'
+      const url = 'user/api/authentication/refuse'
       this.$confirm("确认提交吗？", "提示", {}).then(() => {
         this.loading = true;
         this.editFormVisible = false;
         // 此处应该请求数据
-        this.$axios.put(url+ data,{conten:content}).then((res) => {
+        this.$axios.put(url,{content,id}).then((res) => {
           setTimeout(() => {
             this.$message({message: "提交成功！",type: "success"});
             this.loading = false;
@@ -297,10 +277,11 @@ export default {
     handleSizeChange(val) {
       // console.log(`每页 ${val} 条`);
     },
-    // currentPage 改变时会触发
+    // currentPage 改变时更新数据
     handleCurrentChange(val) {
       console.log(val)
       if(val === 1){
+        this.page = 1;
         this.pageNum =0
       }else{
         this.pageNum = (val-1)

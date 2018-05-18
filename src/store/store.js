@@ -120,8 +120,8 @@ export default new Vuex.Store({
         },
         auth: {
           tokenHost: window.location.origin,
-          tokenPath: 'http://app.grjf365.com:9080/auth/login/shop',
-          // tokenPath: 'api/auth/login/shop',
+          // tokenPath: 'http://app.grjf365.com:9080/auth/login/shop',
+          tokenPath: 'api/auth/login/shop',
           revokePath: 'api/auth/logout/shop'
         },
         http: {
