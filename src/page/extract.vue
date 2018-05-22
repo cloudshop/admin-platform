@@ -1,13 +1,13 @@
 <template>
   <div>
     <!-- 头部按钮 -->
-    <!--  <el-row>
+     <el-row>
       <el-col :span="24">
         <div class="grid-content">
           <span class="navtabs" :class="{on:flat === index}" v-for="(item,index) in navs" @click="filterOrder(index)">{{item}}</span>
         </div>
       </el-col>
-    </el-row> -->
+    </el-row> 
     <!-- 条件选择 -->
     <!-- <el-row class="top-row">
       <div class="grid-content ">
@@ -93,7 +93,7 @@ export default {
     return {
       noData: false,
       flat: 0,
-      navs: ['全部', '待付款', '待发货', '已发货', '已完成', '已取消'],
+      navs: ['全部', '申请中', '失败', '成功'],
       total: 0, //总页数
       page:1,
       pageNum: 0,
@@ -168,7 +168,7 @@ export default {
       }
     },
     filterOrder(index) {
-      this.serchOrderNo = '';
+      // this.serchOrderNo = '';
       this.flat = index;
       this.pageNum = 0;
       this.status = index;
@@ -177,11 +177,12 @@ export default {
     getAllData() {
       this.loading = true;
       const url = 'wallet/api/withdraw-deposits'
-      this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}`)
+      if(this.status === 0 ){
+        this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}`)
         .then((res) => {
           this.listData = res.data;
           const totals = res.headers['x-total-count'];
-          this.listData = res.data;
+          // this.listData = res.data;
           this.total = Number(totals);
           this.loading = false;
           if (Number(totals) === 0) {
@@ -193,6 +194,25 @@ export default {
         .catch((error) => {
           console.log(error);
         })
+      }else{
+        this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}&status.equals=${this.status}`)
+        .then((res) => {
+          this.listData = res.data;
+          const totals = res.headers['x-total-count'];
+          // this.listData = res.data;
+          this.total = Number(totals);
+          this.loading = false;
+          if (Number(totals) === 0) {
+            this.noData = true;
+          } else {
+            this.noData = false;
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+      }
+    
     },
     handleFailed(row) {
       this.editFormVisible = true;
