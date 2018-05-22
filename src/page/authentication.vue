@@ -431,6 +431,7 @@ export default {
 .showimgs{
   width: 100%;
   overflow: hidden;
+  margin-bottom: 20px;
 }
 .showimgs img{
   display: block;
