@@ -120,9 +120,9 @@ export default new Vuex.Store({
         },
         auth: {
           tokenHost: window.location.origin,
-          // tokenPath: 'http://app.grjf365.com:9080/auth/login/shop',
-          tokenPath: 'api/auth/login/shop',
-          revokePath: 'api/auth/logout/shop'
+          // tokenPath: 'http://app.grjf365.com:9080/auth/login',
+          tokenPath: 'api/auth/login',
+          revokePath: 'api/auth/logout'
         },
         http: {
           headers: {
@@ -148,11 +148,14 @@ export default new Vuex.Store({
           // console.log(error);
           if (error.context.status === 500) {
             alert('服务器繁忙，请耐心等待')
+            return false
           }
           if (error.context.status === 400) {
             alert('用户名密码错误')
+            return false
           }
           return console.log('Access Token Error', error.message);
+          return false
         }
 
         const accessToken = oauth2.accessToken.create(result)
