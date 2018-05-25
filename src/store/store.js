@@ -23,7 +23,7 @@ export default new Vuex.Store({
       localStorage.setItem('token', JSON.stringify(data));
       // console.log("11");
     },
-    logout:(state)=>{
+    logout: (state) => {
       state.token = null
       state.userphone = null
       state.password = null
@@ -112,7 +112,7 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    login: function (context, userInput) {
+    login: function(context, userInput) {
       const credentials = {
         client: {
           id: 'web_app',
@@ -147,42 +147,21 @@ export default new Vuex.Store({
         if (error) {
           // console.log(error);
           if (error.context.status === 500) {
-            alert('服务器繁忙，请耐心等待')
             return false
           }
           if (error.context.status === 400) {
-            alert('用户名密码错误')
             return false
           }
-          return console.log('Access Token Error', error.message);
           return false
         }
-
         const accessToken = oauth2.accessToken.create(result)
-        // console.log('Access Token 2', accessToken);
-        // store the token in global variable ??
         context.commit(types.LOGIN, result);
         context.commit(types.USERPHONE, userInput.username);
         context.commit(types.PASSWORD, userInput.password);
-        var val = {
-          "func": "closeCurrent",
-          "param": {
-            'finallyIndex': '1',
-            'refreshAll': true
-          },
-        };
-        var u = navigator.userAgent;
-        var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; // android终端
-        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); // ios终端
-        if (isiOS) {
-          window.webkit.messageHandlers.GongrongAppModel.postMessage(val);
-        } else if (isAndroid) {
-          window.androidObject.JSCallAndroid(JSON.stringify(val));
-        }
       });
     },
 
-    logout: function (context) {
+    logout: function(context) {
       const credentials = {
         client: {
           id: 'web_app',

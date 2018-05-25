@@ -52,33 +52,25 @@ export default {
       }
     },
     btn() {
-      if(this.iphoneYN !== true) {
-        alert('手机号输入错误')
-        return
-      }
-      if(this.PassName == '' || this.PassWord =='') {
-        alert('请输入用户名或密码')
-        return
+      if (this.ruleForm.PassName == '' || this.ruleForm.PassWord == '') {
+        this.$message.error("请输入用户名或密码");
+        return false
       }
       if (this.iphoneYN == true) {
-      this.$store.dispatch(types.LOGIN, {username: this.ruleForm.PassName, password: this.ruleForm.PassWord})
-         .then((res) => {
-            window.sessionStorage.setItem('name',this.ruleForm.PassName)
-            setTimeout(() => {
-              this.$router.push({ path: "/extract" });
-            }, 2000);
+        this.$store.dispatch(types.LOGIN, { username: this.ruleForm.PassName, password: this.ruleForm.PassWord })
+        this.logining = true;
+        setTimeout(() => {
+          var res = this.$store.getters.isAuthed
+          if (res === true) {
+            window.sessionStorage.setItem('name', this.ruleForm.PassName)
+            this.$router.push({ path: "/sllerIndex" });
+          } else {
+            this.$message.error("用户名或密码错误");
+            this.logining = false;
+            return
+          }
+        }, 2000);
 
-          })
-          .catch((error) => {
-            if (error.response.status === 400) {
-              this.$message.error(error.response.data.title);
-              this.ruleForm.PassName = '';
-              this.ruleForm.PassWord = '';
-            }else if(error.response.status === 500){
-              this.$message.error("服务器繁忙，请耐心等待");
-            }
-            return false;
-          });
       } else {
         this.$message.error("请填写正确电话号码!");
         return false
