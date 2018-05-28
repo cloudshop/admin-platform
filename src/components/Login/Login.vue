@@ -63,7 +63,7 @@ export default {
           var res = this.$store.getters.isAuthed
           if (res === true) {
             window.sessionStorage.setItem('name', this.ruleForm.PassName)
-            this.$router.push({ path: "/sllerIndex" });
+            this.$router.push({ path: "/index" });
           } else {
             this.$message.error("用户名或密码错误");
             this.logining = false;
