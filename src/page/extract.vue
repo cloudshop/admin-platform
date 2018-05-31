@@ -4,7 +4,28 @@
      <el-row>
       <el-col :span="24">
         <div class="grid-content">
-          <span class="navtabs" :class="{on:flat === index}" v-for="(item,index) in navs" @click="filterOrder(index)">{{item}}</span>
+          <span class="navtabs" :class="{on:flat === index}" v-for="(item,index) in navs" @click="filterOrder(index)">{{item}}</span> 
+          <span class="derive" @click="derive()">
+            <a href="#" @click="download" id="myId">全部导出</a>
+          </span>
+          <div class="block">
+            <el-date-picker
+              v-model="value2"
+              align="right"
+              type="date"
+              placeholder="结束日期"
+              :picker-options="pickerOptions2">
+            </el-date-picker>
+          </div>
+          <div class="block">
+            <el-date-picker
+              v-model="value1"
+              align="right"
+              type="date"
+              placeholder="开始日期"
+              :picker-options="pickerOptions1">
+            </el-date-picker>
+          </div>
         </div>
       </el-col>
     </el-row> 
@@ -105,8 +126,6 @@ export default {
       listData: [ ],
       input2: '',
       input21: '',
-      serchOrderNo: '',
-      value2: '',
       pickerOptions1: {
         disabledDate(time) {
           return time.getTime() > Date.now();
@@ -131,14 +150,43 @@ export default {
             picker.$emit('pick', date);
           }
         }]
-      }
-   
-    };
+      },
+      pickerOptions2: {
+        disabledDate(time) {
+          return time.getTime() > Date.now();
+        },
+        shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            picker.$emit('pick', new Date());
+          }
+        }, {
+          text: '昨天',
+          onClick(picker) {
+            const date = new Date();
+            date.setTime(date.getTime() - 3600 * 1000 * 24);
+            picker.$emit('pick', date);
+          }
+        }, {
+          text: '一周前',
+          onClick(picker) {
+            const date = new Date();
+            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', date);
+          }
+        }]
+      },
+      value1: '',
+      value2: '',
+      // data:[],
+      date1_month:'',
+      date2_month:'',
+      date1_date:'',
+      date2_date:'',
+      bol:true
+    }
   },
   watch: {
-
-  },
-  created() {
 
   },
   mounted() {
@@ -153,6 +201,80 @@ export default {
     // }
   },
   methods: {
+    derive(){
+
+    },
+    //导出
+    download(){
+      //导出 下载
+      const date1 = new Date(this.value1);  
+      const date2 = new Date(this.value2);
+      const date_value1 = date1.getFullYear() + '-' + (date1.getMonth() + 1) + '-' + date1.getDate();
+      const date_value2 = date2.getFullYear() + '-' + (date2.getMonth() + 1) + '-' + date2.getDate();
+      console.log(date_value1);
+      console.log(date_value2);
+
+      if (date_value1 =='NaN-NaN-NaN' && date_value2 == 'NaN-NaN-NaN') {
+        document.getElementById("myId").setAttribute("href","http://app.grjf365.com:9080/wallet/api/wallet/withdawDetil"); 
+      }else if (date_value1 =='NaN-NaN-NaN' && date_value2 != 'NaN-NaN-NaNN') {
+        document.getElementById("myId").setAttribute("href","http://app.grjf365.com:9080/wallet/api/wallet/subwithdawDetil/" + '' + '/' + date_value2); 
+      }else if (date_value2 =='NaN-NaN-NaN' && date_value1 != 'NaN-NaN-NaN'){
+        document.getElementById("myId").setAttribute("href","http://app.grjf365.com:9080/wallet/api/wallet/subwithdawDetil/" + date_value1 + '/' + ''); 
+      }else{
+        document.getElementById("myId").setAttribute("href","http://app.grjf365.com:9080/wallet/api/wallet/subwithdawDetil/" + date_value1 + '/' + date_value2); 
+      }
+
+      //window.open 下载
+      // const date2 = new Date(this.value2);
+      // window.open('http://app.grjf365.com:9080/wallet/api/wallet/withdawDetil');
+
+      // console.log(this.listData);
+      // const date1 = new Date(this.value1);  
+      // const date2 = new Date(this.value2);
+      // // console.log(date1);
+      // const date_value1=date1.getFullYear() + '-' + (date1.getMonth() + 1) + '-' + date1.getDate() + ' ' + date1.getHours() + ':' + date1.getMinutes() + ':' + date1.getSeconds();
+      // console.log(date_value1);
+      // const date_value2=date2.getFullYear() + '-' + (date2.getMonth() + 1) + '-' + date2.getDate() + ' ' + date2.getHours() + ':' + date2.getMinutes() + ':' + date2.getSeconds();
+      // console.log(date_value2);
+
+     // 导出的开始时间 结束时间
+      //月分 < 10 加 '0'
+      // if ((date1.getMonth() + 1)<10) {
+      //   this.date1_month = '0' + (date1.getMonth() + 1);
+      // }else{
+      //   this.date1_month = date1.getMonth() + 1
+      // }
+      // if ((date2.getMonth() + 1)<10) {
+      //   this.date2_month = '0' + (date2.getMonth() + 1);
+      // }else{
+      //   this.date2_month = date2.getMonth() + 1
+      // }
+      //日期 < 10 加 '0'
+      // if ((date1.getDate() + 1)<10) {
+      //   this.date1_date = '0' + date1.getDate();
+      // }else{
+      //   this.date1_date = date1.getDate();
+      // }
+      // if ((date2.getDate() + 1)<10) {
+      //   this.date2_date = '0' + date2.getDate();
+      // }else{
+      //   this.date2_date = date2.getDate();
+      // }
+      // const date_value1 = parseInt(date1.getFullYear() + '' + this.date1_month + '' + this.date1_date);
+      // const date_value2 = parseInt(date2.getFullYear() + '' + this.date2_month + '' + this.date2_date);
+      // console.log(date_value1);
+      // console.log(date_value2);
+      // for (let i = 0; i < this.listData.length; i++) {
+      //   const aujit = this.listData[i].createdTime;
+
+      //   const time = parseInt(aujit.split('T')[0].split('-').join(''));
+      //   console.log(time);
+      //   if (time>date_value1 && time<date_value2) {
+      //     this.data.push(this.listData[i]);
+      //   }
+      // }
+      // console.log(this.data);
+    },
     serching(val) {
       if (val === "") {
         this.$message({ message: "请输入订单编号!", type: "warning" });
@@ -174,6 +296,7 @@ export default {
       this.status = index;
       this.getAllData();
     },
+    // 获取所有的提现操作数据
     getAllData() {
       this.loading = true;
       const url = 'wallet/api/withdraw-deposits'
@@ -183,6 +306,7 @@ export default {
           this.listData = res.data;
           const totals = res.headers['x-total-count'];
           // this.listData = res.data;
+          console.log(this.listData);
           this.total = Number(totals);
           this.loading = false;
           if (Number(totals) === 0) {
@@ -291,6 +415,22 @@ export default {
 
 </script>
 <style scoped>
+a{
+  text-decoration: none;
+  color: #000;
+}
+.block{
+  display: inline;
+  float: right;
+  border-radius: 8px;
+}
+el-date-picker{
+  /* outline: none; */
+}
+.block:last-child{
+  margin-right: 10px;
+}
+
 .top-row {
   padding-bottom: 20px;
   border-bottom: 1px solid #989898;
@@ -324,6 +464,7 @@ export default {
 .grid-content {
   border-radius: 4px;
   min-height: 36px;
+  margin-top: 5px;
 }
 
 .row-bg {
@@ -347,14 +488,13 @@ export default {
   width: 250px!important;
 }
 
-
 /* Table Head */
 
 .newclass {
   border-collapse: collapse;
   width: 100%;
   border: 1px solid #ccc;
-  margin-top: 20px;
+  margin-top: 15px;
   background: #fff;
   /*box-shadow: 0px 3px 3px rgba(0,0,0,.3);*/
 }
@@ -391,10 +531,6 @@ export default {
   background: #80c7fe;
   color: #fff;
 }
-
-
-
-
 
 /************************/
 
@@ -433,6 +569,16 @@ export default {
   color: #fff;
   border-color: #3a8ee6;
   background: #3a8ee6;
+}
+
+.derive{
+  display: inline-block;
+  padding: 8px 20px;
+  border: 1px solid #ccc;
+  margin: 0 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  float: right;
 }
 
 .on {
