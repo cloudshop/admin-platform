@@ -61,8 +61,8 @@
                   <el-button type="primary" size="medium" @click="lookcard(item)">查看图片</el-button>
                 </td>
                 <td>
-                  <el-button type="primary" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleSeccess(item)">完成</el-button>
-                  <el-button type="danger" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleFailed(item)">失败</el-button>
+                  <el-button type="primary" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleSeccess(item)">允许</el-button>
+                  <el-button type="danger" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleFailed(item)">拒绝</el-button>
                 </td>
               </tr>
             </tbody>

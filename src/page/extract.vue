@@ -8,6 +8,7 @@
           <span class="derive" @click="derive()">
             <a href="#" @click="download" id="myId">全部导出</a>
           </span>
+          <span class="filter" @click="timeFilter()">筛选</span>
           <div class="block">
             <el-date-picker
               v-model="value2"
@@ -63,24 +64,26 @@
           <table class="newclass" width="100%" v-loading="loading" element-loading-text="拼命加载中">
             <thead align=center>
               <tr>
-                <th width="15%">姓名</th>
-                <th width="15%">状态</th>
-                <th width="20%">银行卡号</th>
-                <th width="15%">开户银行</th>
-                <th width="15%">金额</th>
-                <th width="20%">操作</th>
+                <th width="12%">姓名</th>
+                <th width="17%">银行卡号</th>
+                <th width="12%">开户银行</th>
+                <th width="12%">金额</th>
+                <th width="18%">日期</th>
+                <th width="12%">状态</th>
+                <th width="17%">操作</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(item,index) in listData">
-                <td v-text="item.cardholder"></td>
-                <td v-text="item.statusString"></td>
+                <td v-text="item.cardholder"></td>   
                 <td v-text="item.bankcardNumber"></td>
                 <td v-text="item.openingBank"></td>
                 <td>{{item.money + ' 元'}}</td>
+                <td v-text="item.createdTime"></td>
+                <td v-text="item.statusString"></td>
                 <td>
-                  <el-button type="primary" size="medium" :disabled="item.statusString === '提现成功' || item.statusString === '提现失败'" @click="handleSeccess(item)">完成</el-button>
-                  <el-button type="danger" size="medium" :disabled="item.statusString === '提现成功' || item.statusString === '提现失败'" @click="handleFailed(item)">失败</el-button>
+                  <el-button type="primary" size="medium" :disabled="item.statusString === '提现成功' || item.statusString === '提现失败'" @click="handleSeccess(item)">允许</el-button>
+                  <el-button type="danger" size="medium" :disabled="item.statusString === '提现成功' || item.statusString === '提现失败'" @click="handleFailed(item)">拒绝</el-button>
                 </td>
               </tr>
             </tbody>
@@ -123,7 +126,7 @@ export default {
       loading: false,
       editForm: {},
       editFormVisible: false,
-      listData: [ ],
+      listData: [],
       input2: '',
       input21: '',
       pickerOptions1: {
@@ -178,12 +181,12 @@ export default {
       },
       value1: '',
       value2: '',
-      // data:[],
       date1_month:'',
       date2_month:'',
       date1_date:'',
       date2_date:'',
-      bol:true
+      bol:true,
+      time:''
     }
   },
   watch: {
@@ -201,8 +204,21 @@ export default {
     // }
   },
   methods: {
-    derive(){
-
+    //时间过滤
+    timeFilter(){
+      const dates1 = new Date(this.value1);  
+      const dates2 = new Date(this.value2);
+      const date_values1 = dates1.getFullYear() + '-' + (dates1.getMonth() + 1) + '-' + dates1.getDate();
+      const date_values2 = dates2.getFullYear() + '-' + (dates2.getMonth() + 1) + '-' + dates2.getDate();
+      var that = this;
+      this.$axios.get('wallet/api/withdraw-deposits-sub/' + date_values1 + '/' + date_values2 + '/' + 0 +'/' + 10)
+        .then(function(res) {   
+          that.listData = res.data;  
+          console.log(that.listData);
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
     },
     //导出
     download(){
@@ -227,53 +243,6 @@ export default {
       //window.open 下载
       // const date2 = new Date(this.value2);
       // window.open('http://app.grjf365.com:9080/wallet/api/wallet/withdawDetil');
-
-      // console.log(this.listData);
-      // const date1 = new Date(this.value1);  
-      // const date2 = new Date(this.value2);
-      // // console.log(date1);
-      // const date_value1=date1.getFullYear() + '-' + (date1.getMonth() + 1) + '-' + date1.getDate() + ' ' + date1.getHours() + ':' + date1.getMinutes() + ':' + date1.getSeconds();
-      // console.log(date_value1);
-      // const date_value2=date2.getFullYear() + '-' + (date2.getMonth() + 1) + '-' + date2.getDate() + ' ' + date2.getHours() + ':' + date2.getMinutes() + ':' + date2.getSeconds();
-      // console.log(date_value2);
-
-     // 导出的开始时间 结束时间
-      //月分 < 10 加 '0'
-      // if ((date1.getMonth() + 1)<10) {
-      //   this.date1_month = '0' + (date1.getMonth() + 1);
-      // }else{
-      //   this.date1_month = date1.getMonth() + 1
-      // }
-      // if ((date2.getMonth() + 1)<10) {
-      //   this.date2_month = '0' + (date2.getMonth() + 1);
-      // }else{
-      //   this.date2_month = date2.getMonth() + 1
-      // }
-      //日期 < 10 加 '0'
-      // if ((date1.getDate() + 1)<10) {
-      //   this.date1_date = '0' + date1.getDate();
-      // }else{
-      //   this.date1_date = date1.getDate();
-      // }
-      // if ((date2.getDate() + 1)<10) {
-      //   this.date2_date = '0' + date2.getDate();
-      // }else{
-      //   this.date2_date = date2.getDate();
-      // }
-      // const date_value1 = parseInt(date1.getFullYear() + '' + this.date1_month + '' + this.date1_date);
-      // const date_value2 = parseInt(date2.getFullYear() + '' + this.date2_month + '' + this.date2_date);
-      // console.log(date_value1);
-      // console.log(date_value2);
-      // for (let i = 0; i < this.listData.length; i++) {
-      //   const aujit = this.listData[i].createdTime;
-
-      //   const time = parseInt(aujit.split('T')[0].split('-').join(''));
-      //   console.log(time);
-      //   if (time>date_value1 && time<date_value2) {
-      //     this.data.push(this.listData[i]);
-      //   }
-      // }
-      // console.log(this.data);
     },
     serching(val) {
       if (val === "") {
@@ -290,6 +259,7 @@ export default {
       }
     },
     filterOrder(index) {
+      console.log(4444)
       // this.serchOrderNo = '';
       this.flat = index;
       this.pageNum = 0;
@@ -299,14 +269,17 @@ export default {
     // 获取所有的提现操作数据
     getAllData() {
       this.loading = true;
-      const url = 'wallet/api/withdraw-deposits'
+      const url = 'wallet/api/withdraw-deposits';
       if(this.status === 0 ){
         this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}`)
         .then((res) => {
-          this.listData = res.data;
+          this.listData = res.data;  
           const totals = res.headers['x-total-count'];
-          // this.listData = res.data;
           console.log(this.listData);
+          for (var i = 0; i < this.listData.length; i++) {
+            this.listData[i].createdTime = this.listData[i].createdTime.split('T')[0];
+          }
+
           this.total = Number(totals);
           this.loading = false;
           if (Number(totals) === 0) {
@@ -323,7 +296,6 @@ export default {
         .then((res) => {
           this.listData = res.data;
           const totals = res.headers['x-total-count'];
-          // this.listData = res.data;
           this.total = Number(totals);
           this.loading = false;
           if (Number(totals) === 0) {
@@ -572,6 +544,16 @@ el-date-picker{
 }
 
 .derive{
+  display: inline-block;
+  padding: 8px 20px;
+  border: 1px solid #ccc;
+  margin: 0 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  float: right;
+}
+
+.filter{
   display: inline-block;
   padding: 8px 20px;
   border: 1px solid #ccc;
