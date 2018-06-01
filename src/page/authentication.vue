@@ -81,7 +81,7 @@
         <img  :src="editForm.frontImg" alt="身份证正面">
       </div> 
       <div class="showimgs">
-        <img  :src="editForm.reverseImg" alt="身份证背面">
+        <img  :src="editForm.reverseImg" alt="身份证背面"> 
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="lookImgClose">关闭</el-button>
