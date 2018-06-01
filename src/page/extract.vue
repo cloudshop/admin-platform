@@ -197,7 +197,7 @@ export default {
     this.getAllData();
   },
   computed: {
-
+  
   },
   filter: {
     // serching(){
