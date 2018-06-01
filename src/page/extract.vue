@@ -186,7 +186,8 @@ export default {
       date1_date:'',
       date2_date:'',
       bol:true,
-      time:''
+      time:'',
+      totals:''
     }
   },
   watch: {
@@ -215,6 +216,17 @@ export default {
         .then(function(res) {   
           that.listData = res.data;  
           console.log(that.listData);
+          for (var i = 0; i < that.listData.length; i++) {
+            that.listData[i].createdTime = that.listData[i].createdTime.split('T')[0];
+          }
+          that.totals = res.data.length;
+          that.total = Number(that.totals);
+          that.loading = false;
+          if (Number(that.totals) === 0) {
+            that.noData = true;
+          } else {
+            that.noData = false;
+          }
         })
         .catch(function(error) {
             console.log(error);
@@ -227,8 +239,6 @@ export default {
       const date2 = new Date(this.value2);
       const date_value1 = date1.getFullYear() + '-' + (date1.getMonth() + 1) + '-' + date1.getDate();
       const date_value2 = date2.getFullYear() + '-' + (date2.getMonth() + 1) + '-' + date2.getDate();
-      console.log(date_value1);
-      console.log(date_value2);
 
       if (date_value1 =='NaN-NaN-NaN' && date_value2 == 'NaN-NaN-NaN') {
         document.getElementById("myId").setAttribute("href","http://app.grjf365.com:9080/wallet/api/wallet/withdawDetil"); 
@@ -274,15 +284,15 @@ export default {
         this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}`)
         .then((res) => {
           this.listData = res.data;  
-          const totals = res.headers['x-total-count'];
-          console.log(this.listData);
+          this.totals = res.headers['x-total-count'];
+          // console.log(this.listData);
           for (var i = 0; i < this.listData.length; i++) {
             this.listData[i].createdTime = this.listData[i].createdTime.split('T')[0];
           }
 
-          this.total = Number(totals);
+          this.total = Number(this.totals);
           this.loading = false;
-          if (Number(totals) === 0) {
+          if (Number(this.totals) === 0) {
             this.noData = true;
           } else {
             this.noData = false;
@@ -295,7 +305,7 @@ export default {
         this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}&status.equals=${this.status}`)
         .then((res) => {
           this.listData = res.data;
-          const totals = res.headers['x-total-count'];
+          this.totals = res.headers['x-total-count'];
           this.total = Number(totals);
           this.loading = false;
           if (Number(totals) === 0) {
