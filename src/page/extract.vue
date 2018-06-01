@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <!-- 头部按钮 -->
      <el-row>
@@ -306,9 +306,9 @@ export default {
         .then((res) => {
           this.listData = res.data;
           this.totals = res.headers['x-total-count'];
-          this.total = Number(totals);
+          this.total = Number(this.totals);
           this.loading = false;
-          if (Number(totals) === 0) {
+          if (Number(this.totals) === 0) {
             this.noData = true;
           } else {
             this.noData = false;
