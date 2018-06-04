@@ -62,9 +62,9 @@
             <thead align=center>
               <tr>
                 <th width="12%">姓名</th>
-                <th width="17%">身份证号</th>
+                <th width="15%">身份证号</th>
                 <th width="30%">身份证照片</th>
-                <th width="12%">日期</th>
+                <th width="14%">日期</th>
                 <th width="12%">状态</th>
                 <th width="17%">操作</th>
               </tr>
@@ -242,7 +242,8 @@ export default {
         .then(function(res) {   
           that.listData = res.data;  
           for (var i = 0; i < that.listData.length; i++) {
-            that.listData[i].createdTime = that.listData[i].createdTime.split('T')[0];
+            that.listData[i].createdTime = that.listData[i].createdTime.split('T')[0] + ' ' + that.listData[i].createdTime.split('T')[1].split('Z')[0];
+            // console.log(that.listData[i].createdTime);
           }
           that.totals = res.data.length;
           that.total = Number(that.totals);
@@ -279,6 +280,7 @@ export default {
       this.status = index;
       this.getAllData();
     },
+    //获取所有审核数据
     getAllData() {
       this.loading = true;
       const url = 'user/api/authentications'
@@ -289,7 +291,7 @@ export default {
           this.listData = res.data;
           // console.log(this.listData);
           for (var i = 0; i < this.listData.length; i++) {
-            this.listData[i].createdTime = this.listData[i].createdTime.split('T')[0];
+            this.listData[i].createdTime = this.listData[i].createdTime.split('T')[0] + ' ' + this.listData[i].createdTime.split('T')[1].split('Z')[0];
             // console.log(this.listData[i].createdTime);
           }
           this.total = Number(totals);

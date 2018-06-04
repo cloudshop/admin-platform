@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div>
     <!-- 头部按钮 -->
      <el-row>
@@ -197,7 +197,7 @@ export default {
     this.getAllData();
   },
   computed: {
-  
+
   },
   filter: {
     // serching(){
@@ -217,7 +217,7 @@ export default {
           that.listData = res.data;  
           console.log(that.listData);
           for (var i = 0; i < that.listData.length; i++) {
-            that.listData[i].createdTime = that.listData[i].createdTime.split('T')[0];
+             that.listData[i].createdTime = that.listData[i].createdTime.split('T')[0] + ' ' + that.listData[i].createdTime.split('T')[1].split('Z')[0];
           }
           that.totals = res.data.length;
           that.total = Number(that.totals);
@@ -269,7 +269,6 @@ export default {
       }
     },
     filterOrder(index) {
-      console.log(4444)
       // this.serchOrderNo = '';
       this.flat = index;
       this.pageNum = 0;
@@ -287,9 +286,8 @@ export default {
           this.totals = res.headers['x-total-count'];
           // console.log(this.listData);
           for (var i = 0; i < this.listData.length; i++) {
-            this.listData[i].createdTime = this.listData[i].createdTime.split('T')[0];
+            this.listData[i].createdTime = this.listData[i].createdTime.split('T')[0] + ' ' + this.listData[i].createdTime.split('T')[1].split('Z')[0];
           }
-
           this.total = Number(this.totals);
           this.loading = false;
           if (Number(this.totals) === 0) {
