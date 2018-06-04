@@ -5,6 +5,25 @@
       <el-col :span="24">
         <div class="grid-content">
           <span class="navtabs" :class="{on:flat === index}" v-for="(item,index) in navs" @click="filterOrder(index)">{{item}}</span>
+          <span class="filter" @click="timeFilter()">筛选</span>
+          <div class="block">
+            <el-date-picker
+              v-model="value2"
+              align="right"
+              type="date"
+              placeholder="结束日期"
+              :picker-options="pickerOptions2">
+            </el-date-picker>
+          </div>
+          <div class="block">
+            <el-date-picker
+              v-model="value1"
+              align="right"
+              type="date"
+              placeholder="开始日期"
+              :picker-options="pickerOptions1">
+            </el-date-picker>
+          </div>
         </div>
       </el-col>
     </el-row> 
@@ -42,17 +61,17 @@
           <table class="newclass" width="100%" v-loading="loading" element-loading-text="拼命加载中">
             <thead align=center>
               <tr>
-                <th width="15%">姓名</th>
-                <th width="15%">状态</th>
-                <th width="20%">身份证号</th>
+                <th width="12%">姓名</th>
+                <th width="17%">身份证号</th>
                 <th width="30%">身份证照片</th>
-                <th width="20%">操作</th>
+                <th width="12%">日期</th>
+                <th width="12%">状态</th>
+                <th width="17%">操作</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(item,index) in listData">
                 <td v-text="item.realName"></td>
-                <td v-text="item.statusString"></td>
                 <td v-text="item.idnuber"></td>
                 <td class="imgbox">
                   <img class="imgs" :src="item.frontImg" alt="身份证正面">
@@ -60,6 +79,8 @@
                   <!-- <span>查看</span> -->
                   <el-button type="primary" size="medium" @click="lookcard(item)">查看图片</el-button>
                 </td>
+                <td>{{item.createdTime}}</td>
+                <td v-text="item.statusString"></td>
                 <td>
                   <el-button type="primary" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleSeccess(item)">允许</el-button>
                   <el-button type="danger" :disabled="item.statusString === '未通过审核' || item.statusString === '审核通过'" size="medium"  @click="handleFailed(item)">拒绝</el-button>
@@ -81,7 +102,7 @@
         <img  :src="editForm.frontImg" alt="身份证正面">
       </div> 
       <div class="showimgs">
-        <img  :src="editForm.reverseImg" alt="身份证背面"> 
+        <img  :src="editForm.reverseImg" alt="身份证背面">
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="lookImgClose">关闭</el-button>
@@ -123,7 +144,7 @@ export default {
       input2: '',
       input21: '',
       value2: '',
-      pickerOptions1: {
+     pickerOptions1: {
         disabledDate(time) {
           return time.getTime() > Date.now();
         },
@@ -147,8 +168,39 @@ export default {
             picker.$emit('pick', date);
           }
         }]
-      }
-    
+      },
+      pickerOptions2: {
+        disabledDate(time) {
+          return time.getTime() > Date.now();
+        },
+        shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            picker.$emit('pick', new Date());
+          }
+        }, {
+          text: '昨天',
+          onClick(picker) {
+            const date = new Date();
+            date.setTime(date.getTime() - 3600 * 1000 * 24);
+            picker.$emit('pick', date);
+          }
+        }, {
+          text: '一周前',
+          onClick(picker) {
+            const date = new Date();
+            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', date);
+          }
+        }]
+      },
+      value1: '',
+      value2: '',
+      date1_month:'',
+      date2_month:'',
+      date1_date:'',
+      date2_date:'',
+      createdTime:'',
     };
   },
   watch: {
@@ -169,6 +221,42 @@ export default {
     // }
   },
   methods: {
+    //按时间过滤
+    timeFilter(){
+      const dates1 = new Date(this.value1);  
+      const dates2 = new Date(this.value2);
+      const date_values1 = dates1.getFullYear() + '-' + (dates1.getMonth() + 1) + '-' + dates1.getDate();
+      const date_values2 = dates2.getFullYear() + '-' + (dates2.getMonth() + 1) + '-' + dates2.getDate();
+      var that = this;
+      const datas = {
+        'frist':date_values1,
+        'last':date_values2,
+        'page':0,
+        'size':10
+      }
+      this.$axios
+        .post(
+          'user/api/findSubAuthentication',
+          datas
+        )
+        .then(function(res) {   
+          that.listData = res.data;  
+          for (var i = 0; i < that.listData.length; i++) {
+            that.listData[i].createdTime = that.listData[i].createdTime.split('T')[0];
+          }
+          that.totals = res.data.length;
+          that.total = Number(that.totals);
+          that.loading = false;
+          if (Number(that.totals) === 0) {
+            that.noData = true;
+          } else {
+            that.noData = false;
+          }
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
+    },
     serching(val) {
       if (val === "") {
         this.$message({ message: "请输入订单编号!", type: "warning" });
@@ -197,9 +285,13 @@ export default {
       if(this.status === 0 ){
         this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}`)
         .then((res) => {
-          
           const totals = res.headers['x-total-count'];
           this.listData = res.data;
+          // console.log(this.listData);
+          for (var i = 0; i < this.listData.length; i++) {
+            this.listData[i].createdTime = this.listData[i].createdTime.split('T')[0];
+            // console.log(this.listData[i].createdTime);
+          }
           this.total = Number(totals);
           this.loading = false;
           if (Number(totals) === 0) {
@@ -214,7 +306,6 @@ export default {
       }else{
         this.$axios.get(url+`?page=${this.pageNum}&size=${ this.pageSize}&status.equals=${this.status}`)
         .then((res) => {
-          
           const totals = res.headers['x-total-count'];
           this.listData = res.data;
           this.total = Number(totals);
@@ -229,7 +320,6 @@ export default {
           console.log(error);
         })
       }
-      
     },
     lookcard(item){
        this.lookimg = true;
@@ -291,7 +381,6 @@ export default {
           this.$message.error(msg);
           this.loading = false;
         })
-
       });
     },
     handleSizeChange(val) {
@@ -307,7 +396,6 @@ export default {
         this.pageNum = (val-1)
          console.log(this.pageNum)
       }
-      
       this.getAllData()
     }
   }
@@ -439,7 +527,6 @@ export default {
   overflow: hidden;
 }
 
-
 /************************/
 
 .goodsinput {
@@ -474,7 +561,7 @@ export default {
   display: inline-block;
   padding: 8px 20px;
   border: 1px solid #ccc;
-  margin: 0 10px;
+  margin: 5px 10px 0 10px;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -483,6 +570,23 @@ export default {
   color: #fff;
   border-color: #3a8ee6;
   background: #3a8ee6;
+}
+
+.filter{
+  display: inline-block;
+  padding: 8px 20px;
+  border: 1px solid #ccc;
+  margin: 0 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  float: right;
+}
+
+.block{
+  display: inline;
+  float: right;
+  border-radius: 8px;
+  margin-left: 10px;
 }
 
 .on {
